@@ -12,13 +12,26 @@ double golden(double e, double M);
 double newton(double e, double M);
 
 int main()
-{	//parametri orbiti
-	double e = 0.00029451, n = 0.00116365, M, true_anomaly, E;
+{	
+	//parametri orbiti
+	double Ra, Rp, a, e, GM, n, T, M, E, true_anomaly, p, Vp, Vr, V, r;
+	Ra = 6793;
+	Rp = 6786;
+	a = (Ra + Rp) / 2;
+	e = (Ra - Rp) / (Ra + Rp);
+	GM = 398600.4415;
+	n = sqrt(GM / pow(a, 3));
+	T = 2 * PI / n;
+	std::cout << T << std::endl;
+	std::cout << n << std::endl;
+	p = a * (1 - pow(e, 2));
+
+
 	//file creation
 	std::ofstream fout;
 
 	try {
-		fout.open("Data.txt");
+		fout.open("Data_newton.txt");
 	}
 	catch (std::exception& ex) {
 		std::cout << "File opening error.";	
@@ -29,8 +42,13 @@ int main()
 	fout << "t, c\t";
 	fout << "M(t), рад\t";
 	fout << "E(t), рад\t";
-	fout << "Theta(t), рад\t" << std::endl;
-	for (int t{ 0 }; t <= 5400; t++) {
+	fout << "Theta(t), рад\t";
+	fout << "Vp, (км/с)\t";
+	fout << "Vr, (км/c)\t";
+	fout << "V, (км\c)\t";
+	fout << "r (км)" << std::endl;
+
+	for (int t{ 0 }; t <= T; t++) {
 		fout << t << "\t";
 		M = n * t;
 		E = newton(e, M);
@@ -39,9 +57,27 @@ int main()
 		if (true_anomaly < 0)
 			true_anomaly += 2 * PI;
 
+		/*double cosinus = cos(true_anomaly);
+		if (cosinus < 0) 
+			cosinus += 2 * PI;
+		
+		double sinus = sin(true_anomaly);
+		if (sinus < 0)
+			sinus += 2 * PI;*/
+
+		Vp = sqrt(GM/p) * (1 + (e * cos(true_anomaly)));
+		Vr = (sqrt(GM / p)) * e * sin(true_anomaly);
+		V = sqrt(pow(Vr, 2) + pow(Vp, 2));
+		r = p / (1 + e * cos(true_anomaly));
+
 		fout << M << "\t";
 		fout << E << "\t";
-		fout << true_anomaly << std::endl;
+		fout << true_anomaly << "\t";
+		fout << Vp << "\t";
+		fout << Vr << "\t";
+		fout << V << "\t";
+		fout << r << std::endl;
+
 	}
 
 	fout.close();
